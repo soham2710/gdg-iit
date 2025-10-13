@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Summarizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: 500px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #summary {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+
+    #loading {
+      margin-top: 20px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>YouTube Summarizer</h2>
+    <form id="summarizeForm">
+      <input type="text" name="youtube_link" placeholder="Enter YouTube Link" required>
+      <select name="model">
+        <option value="gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+      </select>
+      <textarea name="additional_prompt" placeholder="Write your additional prompt here."></textarea>
+      <button type="submit">Summarize</button>
+    </form>
+
+    <div id="loading" style="display:none;">⏳ Summarizing... please wait</div>
+    <div id="summary"></div>
+  </div>
+
+  <script>
+    document.getElementById('summarizeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const summaryDiv = document.getElementById('summary');
+      const loadingDiv = document.getElementById('loading');
+      summaryDiv.innerHTML = '';
+      loadingDiv.style.display = 'block';
+
+      const formData = new FormData(e.target);
+      try {
+        const response = await fetch('/summarize', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        loadingDiv.style.display = 'none';
+
+        if (data.error) {
+          summaryDiv.innerHTML = `<strong style="color:red;">Error:</strong> ${data.error}`;
+        } else {
+          summaryDiv.innerText = data.summary;
+        }
+      } catch (err) {
+        loadingDiv.style.display = 'none';
+        summaryDiv.innerHTML = `<strong style="color:red;">Request failed.</strong>`;
+      }
+    });
+  </script>
+</body>
+</html>
